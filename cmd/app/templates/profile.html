@@ -1,0 +1,194 @@
+<!--<html>-->
+<!--<head>-->
+<!--  <title>Example App - Profile</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div>-->
+<!--  <h1 style="text-align: center">Profile</h1>-->
+<!--  <p style="white-space: pre; left: 50%; transform: translateX(-50%); position: absolute">{{.}}-->
+<!--    <br>-->
+<!--    <a href="/auth/logout">Logout</a>-->
+<!--  </p>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<html>-->
+<!--<head>-->
+<!--  <title>Example App - Profile</title>-->
+<!--  <script>-->
+<!--    async function shortenURL() {-->
+<!--      const url = document.getElementById("urlInput").value;-->
+<!--      const response = await fetch('/v1/short', {-->
+<!--        method: 'POST',-->
+<!--        headers: {-->
+<!--          'Content-Type': 'application/json'-->
+<!--        },-->
+<!--        body: JSON.stringify({ url: url })-->
+<!--      });-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById("shortURL").innerText = `Short URL: ${data.short_url_code}`;-->
+<!--    }-->
+<!--  </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div>-->
+<!--  <h1 style="text-align: center">Profile</h1>-->
+<!--  <p style="white-space: pre; left: 50%; transform: translateX(-50%); position: absolute">-->
+<!--    {{.}}-->
+<!--    <br>-->
+<!--    <a href="/auth/logout">Logout</a>-->
+<!--  </p>-->
+<!--</div>-->
+<!--<div style="text-align: center; margin-top: 20px;">-->
+<!--  <h2>Shorten URL</h2>-->
+<!--  <input type="text" id="urlInput" placeholder="Enter URL" />-->
+<!--  <button onclick="shortenURL()">Shorten</button>-->
+<!--  <p id="shortURL"></p>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<html>-->
+<!--<head>-->
+<!--  <title>Example App - Profile</title>-->
+<!--  <style>-->
+<!--    /* Position the first div to the right side */-->
+<!--    .profile-container {-->
+<!--      position: absolute;-->
+<!--      top: 20px;-->
+<!--      right: 20px;-->
+<!--      text-align: right; /* Align text to the right within the container */-->
+<!--    }-->
+<!--    .shorten-container {-->
+<!--      text-align: center;-->
+<!--      margin-top: 20px;-->
+<!--    }-->
+<!--  </style>-->
+<!--  <script>-->
+<!--    async function shortenURL() {-->
+<!--      const url = document.getElementById("urlInput").value;-->
+<!--      const response = await fetch('/v1/short', {-->
+<!--        method: 'POST',-->
+<!--        headers: {-->
+<!--          'Content-Type': 'application/json'-->
+<!--        },-->
+<!--        body: JSON.stringify({ url: url })-->
+<!--      });-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById("shortURL").innerText = `Short URL: ${data.short_url_code}`;-->
+<!--    }-->
+<!--  </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="profile-container">-->
+<!--  <h1>Profile</h1>-->
+<!--  <p>-->
+<!--    {{.}}-->
+<!--    <br>-->
+<!--    <a href="/auth/logout">Logout</a>-->
+<!--  </p>-->
+<!--</div>-->
+<!--<div class="shorten-container">-->
+<!--  <h2>Shorten URL</h2>-->
+<!--  <input type="text" id="urlInput" placeholder="Enter URL" />-->
+<!--  <button onclick="shortenURL()">Shorten</button>-->
+<!--  <p id="shortURL"></p>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+<html>
+<head>
+  <title>URL Shortener</title>
+  <style>
+    .profile-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      text-align: right;
+    }
+    .shorten-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .short-url-container {
+      margin-top: 10px;
+    }
+    .copy-button {
+      margin-left: 10px;
+      padding: 5px 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .copy-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script>
+    async function shortenURL() {
+      const url = document.getElementById("urlInput").value;
+      const token = document.getElementById("token").value;
+      const response = await fetch('/v1/short', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ url: url })
+      });
+
+      const shortUrlContainer = document.getElementById("shortURLContainer");
+      const shortUrlText = document.getElementById("shortURLText");
+
+      if (response.status === 400) {
+        shortUrlText.innerText = "Bad request";
+        shortUrlContainer.style.display = 'block';
+        return;
+      }
+
+      const data = await response.json();
+
+      // Get the base URL dynamically
+      const baseUrl = `${window.location.origin}/v1`;
+      const fullShortUrl = `${baseUrl}/${data.short_url_code}`;
+
+      shortUrlText.innerText = fullShortUrl;
+      shortUrlContainer.style.display = 'block';
+    }
+
+    function copyToClipboard() {
+      const shortUrlText = document.getElementById("shortURLText").innerText;
+      navigator.clipboard.writeText(shortUrlText).then(() => {
+        alert("Copied to clipboard!");
+      }).catch(err => {
+        console.error("Failed to copy text: ", err);
+      });
+    }
+  </script>
+</head>
+<body>
+<div class="profile-container">
+  <h1>Profile</h1>
+  <p>
+    {{.Username}}
+    <br>
+    <a href="/auth/logout">Logout</a>
+  </p>
+</div>
+<div class="shorten-container">
+  <h1>Shorten URL</h1>
+  <input type="text" id="urlInput" placeholder="Enter URL" />
+  <input type="hidden" id="token" value="{{.Token}}" />
+  <button onclick="shortenURL()">Shorten</button>
+  <div id="shortURLContainer" class="short-url-container" style="display: none;">
+    <span id="shortURLText"></span>
+    <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+  </div>
+</div>
+</body>
+</html>
