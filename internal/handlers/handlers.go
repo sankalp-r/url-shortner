@@ -16,6 +16,7 @@ import (
 	"github.com/zitadel/zitadel-go/v3/pkg/http/middleware"
 )
 
+// Handler handles the web-requests and api-requests
 type Handler struct {
 	store         storage.Store
 	authenticator *authentication.Authenticator[*oidc2.UserInfoContext[*oidc.IDTokenClaims, *oidc.UserInfo]]
@@ -68,6 +69,7 @@ func New(opts ...Option) *Handler {
 	}
 }
 
+// ShortenURL creates a short url code for given long url
 func (h *Handler) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	var req ShortenRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -88,6 +90,7 @@ func (h *Handler) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// RedirectURL redirects given short-url to correspoding long url
 func (h *Handler) RedirectURL(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	shortURL := vars["shortURL"]
@@ -102,6 +105,7 @@ func (h *Handler) RedirectURL(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, originalURL, http.StatusFound)
 }
 
+// RegisterRoutes to the router
 func (h *Handler) RegisterRoutes(router *http.ServeMux) {
 	if h.authenticator != nil {
 		router.Handle("/auth/", h.authenticator)
